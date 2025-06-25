@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Казино</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Orbitron:wght@500;700&display=swap');
+        
+        :root {
+            --primary: #FF3D85;
+            --secondary: #00F0FF;
+            --accent: #FFD700;
+            --dark: #0A0A1A;
+            --darker: #050510;
+            --light: #FFFFFF;
+            --neon-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary), 0 0 30px var(--secondary);
+            --pink-neon: 0 0 10px var(--primary), 0 0 20px var(--primary);
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+            margin-bottom: 40px;
+            text-shadow: var(--pink-neon);
+            font-size: 3rem;
+            letter-spacing: 3px;
+            position: relative;
+            animation: titleGlow 2s infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            0% { text-shadow: var(--pink-neon); }
+            100% { text-shadow: 0 0 20px var(--primary), 0 0 40px var(--primary), 0 0 60px var(--primary); }
+        }
+        
+        .slot-machine {
+            background: rgba(10, 10, 30, 0.8);
+            border: 3px solid var(--secondary);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--neon-shadow);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .slot-machine::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .slots {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 40px;
+            perspective: 1000px;
+        }
+        
+        .slot {
+            width: 120px;
+            height: 180px;
+            background: linear-gradient(145deg, #1E1E3A, #2A2A4A);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+            font-weight: bold;
+            color: var(--light);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform-style: preserve-3d;
+            transition: transform 0.3s;
+        }
+        
+        .slot::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 61, 133, 0.3), rgba(0, 240, 255, 0.3));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .slot:hover::before {
+            opacity: 1;
+        }
+        
+        .slot:hover {
+            transform: translateY(-10px) rotateX(10deg);
+        }
+        
+        .slot-value {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .spin-button {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .spin-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .spin-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.4);
+        }
+        
+        .spin-button:hover::before {
+            left: 100%;
+        }
+        
+        .spin-button:active {
+            transform: translateY(1px);
+        }
+        
+        .spin-button:disabled {
+            background: linear-gradient(45deg, #555, #888);
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none;
+        }
+        
+        .result {
+            margin-top: 30px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            height: 40px;
+            color: var(--accent);
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        
+        .jackpot {
+            animation: jackpot 0.5s infinite alternate, rainbow 2s infinite linear;
+        }
+        
+        @keyframes jackpot {
+            from { 
+                transform: scale(1); 
+                text-shadow: 0 0 10px var(--accent);
+            }
+            to { 
+                transform: scale(1.1); 
+                text-shadow: 0 0 30px var(--accent);
+            }
+        }
+        
+        @keyframes rainbow {
+            0% { color: #FF3D85; }
+            25% { color: #FFD700; }
+            50% { color: #00F0FF; }
+            75% { color: #7BFF00; }
+            100% { color: #FF3D85; }
+        }
+        
+        .emoji-win {
+            animation: emojiPulse 0.5s infinite alternate, emojiGlow 1s infinite alternate;
+        }
+        
+        @keyframes emojiPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.2); }
+        }
+        
+        @keyframes emojiGlow {
+            from { filter: drop-shadow(0 0 5px var(--primary)); }
+            to { filter: drop-shadow(0 0 15px var(--secondary)); }
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: var(--secondary);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <h1>КАЗИНО</h1>
+    
+    <div class="slot-machine">
+        <div class="slots">
+            <div class="slot" id="slot1">
+                <div class="slot-value">-</div>
+            </div>
+            <div class="slot" id="slot2">
+                <div class="slot-value">-</div>
+            </div>
+            <div class="slot" id="slot3">
+                <div class="slot-value">-</div>
+            </div>
+        </div>
+        
+        <button class="spin-button" id="spinButton">Крутить</button>
+        <div class="result" id="result"></div>
+    </div>
+    
+    <script>
+        const spinButton = document.getElementById('spinButton');
+        const slots = [
+            document.getElementById('slot1'),
+            document.getElementById('slot2'),
+            document.getElementById('slot3')
+        ];
+        const resultDisplay = document.getElementById('result');
+        const particlesContainer = document.getElementById('particles');
+        
+
+        const ranges = [
+            { min: 1, max: 23 }, 
+            { min: 1, max: 25 }, 
+            { min: 1, max: 24 } 
+        ];
+        
+        let spinning = false;
+        let results = [null, null, null];
+        
+        // Создаем частицы
+        function createParticles() {
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.width = `${Math.random() * 5 + 2}px`;
+                particle.style.height = particle.style.width;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.opacity = Math.random() * 0.5 + 0.1;
+                particle.style.animation = `float ${Math.random() * 10 + 5}s linear infinite`;
+                particlesContainer.appendChild(particle);
+                
+                // Анимация движения
+                const keyframes = `
+                    @keyframes float {
+                        0% {
+                            transform: translate(0, 0);
+                        }
+                        100% {
+                            transform: translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px);
+                        }
+                    }
+                `;
+                const style = document.createElement('style');
+                style.innerHTML = keyframes;
+                document.head.appendChild(style);
+            }
+        }
+        
+        createParticles();
+        
+        spinButton.addEventListener('click', startSpin);
+        
+        function startSpin() {
+            if (spinning) return;
+            
+            spinning = true;
+            spinButton.disabled = true;
+            resultDisplay.textContent = '';
+            resultDisplay.className = 'result';
+            
+            // Убираем анимацию с барабанов
+            slots.forEach(slot => {
+                slot.querySelector('.slot-value').className = 'slot-value';
+            });
+            
+            // Количество шагов анимации для каждого барабана
+            const spinSteps = [
+                20 + Math.floor(Math.random() * 20),
+                25 + Math.floor(Math.random() * 20),
+                15 + Math.floor(Math.random() * 20)
+            ];
+            
+            let completedSpins = 0;
+            
+            // Запускаем анимацию для каждого барабана
+            slots.forEach((slot, index) => {
+                spinSlot(slot, index, spinSteps[index], () => {
+                    completedSpins++;
+                    if (completedSpins === 3) {
+                        finishSpin();
+                    }
+                });
+            });
+        }
+        
+        function spinSlot(slot, slotIndex, steps, callback) {
+            let currentStep = 0;
+            const slotValue = slot.querySelector('.slot-value');
+            
+            const spinInterval = setInterval(() => {
+                // Во время прокрутки показываем только цифры
+                const displayValue = Math.floor(Math.random() * (ranges[slotIndex].max - ranges[slotIndex].min + 1)) + ranges[slotIndex].min;
+                slotValue.textContent = displayValue;
+                
+                // Смещаем значение вверх для эффекта прокрутки
+                slotValue.style.transform = `translateY(-20px)`;
+                slotValue.style.opacity = '0';
+                
+                // Через небольшой промежуток возвращаем на место
+                setTimeout(() => {
+                    slotValue.style.transform = `translateY(0)`;
+                    slotValue.style.opacity = '1';
+                }, 100);
+                
+                currentStep++;
+                
+
+                if (currentStep >= steps) {
+                    clearInterval(spinInterval);
+                    
+
+                    results[slotIndex] = '🎰';
+                    slotValue.textContent = '🎰';
+                    slotValue.classList.add('emoji-win');
+                    
+                    callback();
+                }
+            }, 100);
+        }
+        
+        function finishSpin() {
+            spinning = false;
+            spinButton.disabled = false;
+            
+
+            resultDisplay.textContent = 'СУПЕР ДЖЕКПОТ! 🎰🎰🎰';
+            resultDisplay.classList.add('jackpot');
+            
+
+            createConfetti();
+        }
+        
+        function createConfetti() {
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('particle');
+                confetti.style.background = getRandomColor();
+                confetti.style.width = `${Math.random() * 10 + 5}px`;
+                confetti.style.height = `${Math.random() * 10 + 5}px`;
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.top = '-10px';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                confetti.style.opacity = Math.random() * 0.7 + 0.3;
+                particlesContainer.appendChild(confetti);
+                
+                const animationDuration = Math.random() * 3 + 2;
+                const keyframes = `
+                    @keyframes confetti-fall-${i} {
+                        0% {
+                            transform: translate(${Math.random() * 200 - 100}px, 0) rotate(0deg);
+                            opacity: 1;
+                        }
+                        100% {
+                            transform: translate(${Math.random() * 200 - 100}px, ${window.innerHeight}px) rotate(${Math.random() * 360}deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                
+                const style = document.createElement('style');
+                style.innerHTML = keyframes;
+                document.head.appendChild(style);
+                
+                confetti.style.animation = `confetti-fall-${i} ${animationDuration}s linear forwards`;
+                
+                // Удаляем конфетти после анимации
+                setTimeout(() => {
+                    confetti.remove();
+                    style.remove();
+                }, animationDuration * 1000);
+            }
+        }
+        
+        function getRandomColor() {
+            const colors = ['#FF3D85', '#00F0FF', '#FFD700', '#7BFF00', '#FF8C00', '#A020F0'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+    </script>
+</body>
+</html>
